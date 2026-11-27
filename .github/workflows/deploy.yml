@@ -4,11 +4,21 @@ name: 股指基差快照自动更新
 # 前端每 60 秒读取一次快照，实现分钟级自动更新。
 
 on:
+  # 上传前端或脚本代码后自动跑一次（数据文件变化不触发，避免循环）
+  push:
+    branches: [main, master]
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'style.css'
+      - 'lib/**'
+      - 'scripts/**'
+      - '.github/workflows/deploy.yml'
   schedule:
-    # UTC 1:00-7:59 = 北京时间 9:00-15:59，每 15 分钟一次（周一至周五）
-    - cron: '*/15 1-7 * * 1-5'
-    # UTC 8:00 = 北京时间 16:00，收盘后再生成一次
-    - cron: '0 8 * * 1-5'
+    # 错峰分钟，避开 GitHub 整点/15分拥堵；UTC 1-7 = 北京 9-16，周一至周五
+    - cron: '7,22,37,52 1-7 * * 1-5'
+    # UTC 8:13 = 北京时间 16:13，收盘后再生成一次
+    - cron: '13 8 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -39,7 +49,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/*.json
+          git add data/basis.json data/synth_IF.json data/synth_IH.json data/synth_IC.json data/synth_IM.json
           if git diff --cached --quiet; then
             echo "数据无变化，跳过提交"
           else
