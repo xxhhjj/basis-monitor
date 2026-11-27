@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股指基差监控 · 次月+当季合成年化升贴水率</title>
+<meta name="description" content="股指期货基差实时监控：IF/IH/IC/IM 次月与当季合约年化升贴水率，0.6/0.4 加权合成，历史百分位统计。数据来源新浪财经，剔除当月合约交割干扰。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1220'/%3E%3Cpath d='M6 20 L13 14 L19 17 L26 9' stroke='%23f5a524' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='9' y='17' width='3' height='8' rx='1' fill='%2334d399'/%3E%3Crect x='20' y='12' width='3' height='13' rx='1' fill='%23f87171'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--site-surface)"/><path d="M6 20 L13 14 L19 17 L26 9" stroke="var(--site-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="17" width="3" height="8" rx="1" fill="var(--down)"/><rect x="20" y="12" width="3" height="13" rx="1" fill="var(--up)"/></svg>
+    <div class="brand-text">
+      <h1>股指基差监控</h1>
+      <p class="brand-sub">次月 + 当季 · 合成年化升贴水率</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="market-status" class="status-pill" data-state="loading">连接中</span>
+    <span class="clock" id="bj-clock" aria-label="北京时间">--:--:--</span>
+    <span class="update-info" id="update-info">等待数据…</span>
+    <button id="refresh-btn" class="btn" type="button" title="立即刷新行情">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2a6 6 0 1 0 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 2v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      刷新
+    </button>
+  </div>
+</header>
+
+<div class="formula-strip">
+  <span class="formula">合成年化 = <b>0.6</b> × 次月年化 + <b>0.4</b> × 当季年化</span>
+  <span class="formula-note">仅取次月与当季合约，完全剔除当月权重，规避临近交割日的价格异常波动</span>
+</div>
+<div id="data-note" class="data-note" data-state="loading" role="status" aria-live="polite">正在连接行情；非交易时段将自动显示最近交易日收盘数据…</div>
+
+<main>
+  <section class="cards" id="cards" aria-label="四大股指期货基差概览">
+
+    <article class="card" id="card-IF" data-product="IF">
+      <div class="card-head">
+        <div class="product-id"><span class="product-code">IF</span><span class="product-name">沪深300</span></div>
+        <div class="index-quote"><span class="index-price" data-role="index-price">—</span><span class="chg-badge" data-role="index-chg">—</span></div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-label">合成年化升贴水率</div>
+        <div class="hero-value" data-role="comp-ann">—</div>
+        <div class="pct-row">
+          <span class="pct-label">历史分位</span>
+          <div class="gauge" role="img" data-role="comp-gauge" aria-label="合成年化历史百分位"><div class="gauge-marker" data-role="comp-marker"></div></div>
+          <span class="pct-value" data-role="comp-pct">—</span>
+        </div>
+        <div class="sample-note" data-role="sample-note">历史样本加载中…</div>
+      </div>
+      <div class="legs" data-role="legs"></div>
+      <div class="card-error" data-role="error" hidden>行情连接中断 <button class="link-btn" data-action="retry" type="button">重试</button></div>
+    </article>
+
+    <article class="card" id="card-IH" data-product="IH">
+      <div class="card-head">
+        <div class="product-id"><span class="product-code">IH</span><span class="product-name">上证50</span></div>
+        <div class="index-quote"><span class="index-price" data-role="index-price">—</span><span class="chg-badge" data-role="index-chg">—</span></div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-label">合成年化升贴水率</div>
+        <div class="hero-value" data-role="comp-ann">—</div>
+        <div class="pct-row">
+          <span class="pct-label">历史分位</span>
+          <div class="gauge" role="img" data-role="comp-gauge" aria-label="合成年化历史百分位"><div class="gauge-marker" data-role="comp-marker"></div></div>
+          <span class="pct-value" data-role="comp-pct">—</span>
+        </div>
+        <div class="sample-note" data-role="sample-note">历史样本加载中…</div>
+      </div>
+      <div class="legs" data-role="legs"></div>
+      <div class="card-error" data-role="error" hidden>行情连接中断 <button class="link-btn" data-action="retry" type="button">重试</button></div>
+    </article>
+
+    <article class="card" id="card-IC" data-product="IC">
+      <div class="card-head">
+        <div class="product-id"><span class="product-code">IC</span><span class="product-name">中证500</span></div>
+        <div class="index-quote"><span class="index-price" data-role="index-price">—</span><span class="chg-badge" data-role="index-chg">—</span></div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-label">合成年化升贴水率</div>
+        <div class="hero-value" data-role="comp-ann">—</div>
+        <div class="pct-row">
+          <span class="pct-label">历史分位</span>
+          <div class="gauge" role="img" data-role="comp-gauge" aria-label="合成年化历史百分位"><div class="gauge-marker" data-role="comp-marker"></div></div>
+          <span class="pct-value" data-role="comp-pct">—</span>
+        </div>
+        <div class="sample-note" data-role="sample-note">历史样本加载中…</div>
+      </div>
+      <div class="legs" data-role="legs"></div>
+      <div class="card-error" data-role="error" hidden>行情连接中断 <button class="link-btn" data-action="retry" type="button">重试</button></div>
+    </article>
+
+    <article class="card" id="card-IM" data-product="IM">
+      <div class="card-head">
+        <div class="product-id"><span class="product-code">IM</span><span class="product-name">中证1000</span></div>
+        <div class="index-quote"><span class="index-price" data-role="index-price">—</span><span class="chg-badge" data-role="index-chg">—</span></div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-label">合成年化升贴水率</div>
+        <div class="hero-value" data-role="comp-ann">—</div>
+        <div class="pct-row">
+          <span class="pct-label">历史分位</span>
+          <div class="gauge" role="img" data-role="comp-gauge" aria-label="合成年化历史百分位"><div class="gauge-marker" data-role="comp-marker"></div></div>
+          <span class="pct-value" data-role="comp-pct">—</span>
+        </div>
+        <div class="sample-note" data-role="sample-note">历史样本加载中…</div>
+      </div>
+      <div class="legs" data-role="legs"></div>
+      <div class="card-error" data-role="error" hidden>行情连接中断 <button class="link-btn" data-action="retry" type="button">重试</button></div>
+    </article>
+
+  </section>
+
+  <section class="term-section" aria-label="期限结构">
+    <div class="chart-head">
+      <h2>期限结构 · 挂牌合约升贴水曲线</h2>
+      <div class="term-controls">
+        <div class="seg term-seg" role="group" aria-label="纵轴指标">
+          <button type="button" class="active" data-metric="ann">年化升贴水率</button>
+          <button type="button" data-metric="basis">基差点数</button>
+        </div>
+        <div class="seg term-seg" role="group" aria-label="视图模式">
+          <button type="button" class="active" data-mode="compare">四品种对比</button>
+          <button type="button" data-mode="single">单品种明细</button>
+        </div>
+        <label class="switch" title="当月合约仅作参考展示，不参与合成权重">
+          <input type="checkbox" id="term-front" checked>
+          <span class="track" aria-hidden="true"></span>
+          <span class="switch-label">当月参考点</span>
+        </label>
+      </div>
+    </div>
+    <div class="chart-tabs term-tabs" id="term-tabs" role="tablist" aria-label="选择品种" hidden>
+      <button role="tab" class="tab active" data-product="IF" aria-selected="true" type="button">IF 沪深300</button>
+      <button role="tab" class="tab" data-product="IH" aria-selected="false" type="button">IH 上证50</button>
+      <button role="tab" class="tab" data-product="IC" aria-selected="false" type="button">IC 中证500</button>
+      <button role="tab" class="tab" data-product="IM" aria-selected="false" type="button">IM 中证1000</button>
+    </div>
+    <div class="chart-meta" id="term-meta">等待行情数据…</div>
+    <div class="chart-wrap">
+      <svg id="term-chart" viewBox="0 0 860 330" role="img" aria-label="股指期货期限结构曲线"></svg>
+      <div class="chart-empty" id="term-empty">行情连接中，期限结构待数据…</div>
+      <div class="term-tip" id="term-tip" hidden></div>
+    </div>
+    <div class="term-legend" id="term-legend"></div>
+    <div class="term-table-wrap" id="term-table-wrap" hidden></div>
+  </section>
+
+  <section class="chart-section" aria-label="合成年化历史走势">
+    <div class="chart-head">
+      <h2>合成年化升贴水率 · 历史走势与当前分位</h2>
+      <div class="chart-tabs" role="tablist" aria-label="选择品种">
+        <button role="tab" class="tab active" data-product="IF" aria-selected="true" type="button">IF 沪深300</button>
+        <button role="tab" class="tab" data-product="IH" aria-selected="false" type="button">IH 上证50</button>
+        <button role="tab" class="tab" data-product="IC" aria-selected="false" type="button">IC 中证500</button>
+        <button role="tab" class="tab" data-product="IM" aria-selected="false" type="button">IM 中证1000</button>
+      </div>
+    </div>
+    <div class="range-bar" id="range-bar">
+      <span class="range-title">时间范围</span>
+      <div class="seg year-seg" role="group" aria-label="快捷时间范围">
+        <button type="button" data-years="1">1年</button>
+        <button type="button" data-years="3">3年</button>
+        <button type="button" data-years="5">5年</button>
+      </div>
+      <input type="range" id="range-start" min="0" max="100" value="0" aria-label="起始时间">
+      <span class="range-date" id="range-start-label">—</span>
+      <span class="range-sep">~</span>
+      <input type="range" id="range-end" min="0" max="100" value="100" aria-label="结束时间">
+      <span class="range-date" id="range-end-label">—</span>
+      <button type="button" class="range-reset" id="range-reset">全选</button>
+      <label class="switch" title="叠加标的指数走势（右轴）">
+        <input type="checkbox" id="show-index" checked>
+        <span class="track" aria-hidden="true"></span>
+        <span class="switch-label">标的指数</span>
+      </label>
+    </div>
+    <div class="chart-meta" id="chart-meta">样本加载中…</div>
+    <div class="chart-wrap">
+      <svg id="history-chart" viewBox="0 0 860 300" role="img" aria-label="合成年化升贴水率历史折线图"></svg>
+      <div class="chart-empty" id="chart-empty" hidden>暂无历史样本。页面每日自动累积收盘快照，样本将随使用时间增长。</div>
+      <div class="term-tip" id="hist-tip" hidden></div>
+    </div>
+    <div class="chart-legend">
+      <span><i class="swatch swatch-comp"></i>合成年化（0.6×次月 + 0.4×当季）</span>
+      <span><i class="swatch swatch-median"></i>样本中位数</span>
+      <span><i class="swatch swatch-live"></i>当前实时值</span>
+      <span><i class="swatch swatch-band"></i>10%–90% 分位区间</span>
+      <span><i class="swatch swatch-index"></i>标的指数（右轴）</span>
+    </div>
+  </section>
+
+  <details class="methodology">
+    <summary>计算方法与数据说明</summary>
+    <div class="method-body">
+      <h3>合约选取</h3>
+      <p>页面展示中金所挂牌的<b>当月、下月、当季、下季</b>四个合约的最新价、基差与年化基差。其中合成年化仅取<b>次月合约</b>（当月之后的第一个月份）与<b>当季合约</b>（次月之后最近的季月，3/6/9/12 月），排除当月合约交割收敛干扰。合约随中金所规则自动换月。</p>
+      <h3>年化升贴水率</h3>
+      <p>基差 = 标的指数最新价 − 期货最新价；年化升贴水率 = 基差 ÷ 期货价 × 365 ÷ 剩余日历天数 × 100%。剩余天数按合约到期日（交割月第三个周五，遇节假日顺延）计算，到期日收盘后自动滚动合约。合成年化 = 0.6 × 次月年化 + 0.4 × 当季年化。<b>正值代表期货贴水，负值代表期货升水</b>（与「基差监控计算器」口径一致）。</p>
+      <h3>期限结构</h3>
+      <p>期限结构图按合约月份从左到右展示各挂牌合约（当月、次月、当季、下季）的年化升贴水率或基差点数。当月合约以空心参考点与虚线连接展示，<b>不参与任何合成权重</b>；次月（×0.6）与当季（×0.4）为实心加权点。可切换四品种对比或单品种明细，鼠标悬停查看逐合约价格与基差。</p>
+      <h3>历史百分位</h3>
+      <p>百分位 = 历史样本中小于等于当前值的比例。样本由服务端用逐日实际次月/当季合约收盘价重建的年化序列计算（0.6×次月 + 0.4×当季），按移仓换月自动滚动。页面明确标注样本区间与交易日数量；已交割合约日线落盘缓存，历史序列稳定可复现。</p>
+      <h3>数据来源与刷新</h3>
+      <p>行情来自新浪财经公开接口（hq.sinajs.cn），因该接口强制校验 Referer，由本机 Node 服务统一代理抓取；日线来自新浪财经指数与合约日K接口。交易时段每 10 秒自动刷新，非交易时段显示最近交易日收盘数据并标注实际行情时间。数据仅供研究参考，不构成投资建议。</p>
+    </div>
+  </details>
+</main>
+
+<footer class="footer">
+  <span>数据来源：新浪财经 · 交易时段 10 秒自动刷新</span>
+  <span>仅供研究参考，不构成投资建议</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
