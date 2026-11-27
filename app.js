@@ -47,6 +47,18 @@ function bjDateStr() {
   const d = bjNow();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
+/* 按当前北京时间本地判断交易状态，避免快照滞后时仍显示旧状态 */
+function localMarketStatus(quoteDate) {
+  const d = bjNow();
+  if (d.getDay() === 0 || d.getDay() === 6) return "休市";
+  if (quoteDate && quoteDate !== bjDateStr()) return "休市";
+  const mins = d.getHours() * 60 + d.getMinutes();
+  if (mins < 9 * 60 + 30) return "未开盘";
+  if (mins <= 11 * 60 + 30) return "交易中";
+  if (mins < 13 * 60) return "午间休市";
+  if (mins <= 15 * 60) return "交易中";
+  return "已收盘";
+}
 function percentile(value, arr) {
   if (!arr || !arr.length || value == null || !isFinite(value)) return null;
   let cnt = 0;
@@ -196,7 +208,7 @@ function updateHeader(error) {
     pill.dataset.state = "loading";
     return;
   }
-  const ms = state.basis.marketStatus || "";
+  const ms = localMarketStatus(state.basis.quoteDate) || state.basis.marketStatus || "";
   pill.textContent = ms;
   pill.dataset.state = ms === "交易中" ? "trading" : "closed";
 
@@ -670,6 +682,7 @@ function init() {
   const clock = () => {
     const d = bjNow();
     $("bj-clock").textContent = [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => String(n).padStart(2, "0")).join(":");
+    if (state.basis) updateHeader();
   };
   clock();
   setInterval(clock, 1000);
